@@ -1,7 +1,5 @@
-
-def check_odd_even(n):
+def check_even_odd(n):
     if n % 2 == 0:
-        print("Value is even")
+        return "Even"
     else:
-        print("Value is odd")
-
+        return "Odd"
