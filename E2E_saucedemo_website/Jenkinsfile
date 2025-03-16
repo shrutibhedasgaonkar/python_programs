@@ -3,17 +3,12 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip install -r E2E_saucedemo_website/requirements.txt'
-            }
-        }
-        stage('Run Tests') {
-            steps {
-                sh 'python E2E_saucedemo_website/test_saucedemo.py'
+                checkout scm: [
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']], // Use "main" instead of "master"
+                    extensions: [],
+                    userRemoteConfigs: [[url: 'https://github.com/shrutibhedasgaonkar/python_programs']]
+                ]
             }
         }
     }
