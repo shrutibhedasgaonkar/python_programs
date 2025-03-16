@@ -8,17 +8,17 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r E2E_saucedemo_website/requirements.txt'
+                bat 'pip install -r E2E_saucedemo_website/requirements.txt'
             }
         }
         stage('Run Tests') {
             steps {
-                sh 'python E2E_saucedemo_website/test_saucedemo.py'
+                bat 'python E2E_saucedemo_website/test_saucedemo.py'
             }
         }
         stage('Code Quality') {
             steps {
-                sh 'pylint E2E_saucedemo_website/*.py'
+                bat 'pylint E2E_saucedemo_website/*.py'
             }
         }
     }
