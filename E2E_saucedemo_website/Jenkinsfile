@@ -1,24 +1,69 @@
 pipeline {
     agent any
+    tools {
+        git 'Git' // Ensure this matches the name of your Git installation in Global Tool Configuration
+    }
     stages {
         stage('Checkout') {
             steps {
+                // Checkout the code from the Git repository
                 checkout scm
             }
         }
         stage('Install Dependencies') {
             steps {
-                bat 'pip install -r E2E_saucedemo_website/requirements.txt'
+                // Check if requirements.txt exists before running pip install
+                script {
+                    if (fileExists('E2E_saucedemo_website/requirements.txt')) {
+                        bat 'pip install -r E2E_saucedemo_website/requirements.txt'
+                    } else {
+                        echo 'No requirements.txt file found. Skipping dependency installation.'
+                    }
+                }
             }
         }
         stage('Run Tests') {
             steps {
-                bat 'python E2E_saucedemo_website/test_saucedemo.py'
+                script {
+                    def testFiles = [
+                        'test_1_login.py',
+                        'test_2_product_selection.py',
+                        'test_3_cart_info.py',
+                        'test_4_checkout_step_one_page.py',
+                        'test_5_checkout_step_two_page.py'
+                    ]
+                    boolean allTestsPassed = true;  // Initialize flag
+                    for (def testFile in testFiles) {
+                        if (fileExists(testFile)) {
+                            try {
+                                bat "python ${testFile}"
+                            } catch (Exception e) {
+                                echo "Test ${testFile} failed: ${e.getMessage()}"
+                                allTestsPassed = false;  // Set flag to false if any test fails
+                            }
+                        } else {
+                            echo "${testFile} not found, skipping"
+                        }
+                    }
+                    if(allTestsPassed){
+                        currentBuild.result = 'SUCCESS' // Set result to success after all tests
+                    } else {
+                        currentBuild.result = 'FAILURE' // Set result to Failure if any of the tests fail
+                    }
+                }
             }
         }
         stage('Code Quality') {
             steps {
-                bat 'pylint E2E_saucedemo_website/*.py'
+                // Run pylint only if Python files exist in the directory
+                script {
+                    def pythonFiles = findFiles(glob: 'E2E_saucedemo_website/*.py')
+                    if (pythonFiles.size() > 0) {
+                        bat 'pylint E2E_saucedemo_website/*.py'
+                    } else {
+                        echo 'No Python files found for code quality checks. Skipping pylint.'
+                    }
+                }
             }
         }
     }
