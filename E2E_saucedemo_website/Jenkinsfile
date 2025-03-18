@@ -7,13 +7,15 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+                dir('E2E_saucedemo_website') {
+                }
             }
         }
         stage('Install Dependencies') {
             steps {
                 script {
-                    if (fileExists('requirements.txt')) {
-                        bat 'pip install -r requirements.txt'
+                    if (fileExists('E2E_saucedemo_website/requirements.txt')) {
+                        bat 'pip install -r E2E_saucedemo_website/requirements.txt'
                     } else {
                         echo 'No requirements.txt found. Skipping dependencies.'
                     }
@@ -24,11 +26,11 @@ pipeline {
             steps {
                 script {
                     def testFiles = [
-                        'test_1_login.py',
-                        'test_2_product_selection.py',
-                        'test_3_cart_info.py',
-                        'test_4_checkout_step_one_page.py',
-                        'test_5_checkout_step_two_page.py'
+                        'E2E_saucedemo_website/test_1_login.py',
+                        'E2E_saucedemo_website/test_2_product_selection.py',
+                        'E2E_saucedemo_website/test_3_cart_info.py',
+                        'E2E_saucedemo_website/test_4_checkout_step_one_page.py',
+                        'E2E_saucedemo_website/test_5_checkout_step_two_page.py'
                     ]
 
                     boolean testsFailed = false
@@ -56,9 +58,9 @@ pipeline {
         stage('Code Quality') {
             steps {
                 script {
-                    if (fileExists('__init__.py')) {
+                    if (fileExists('E2E_saucedemo_website/__init__.py')) {
                         bat 'pip install pylint' // Ensure pylint is installed
-                        bat 'pylint *.py'
+                        bat 'pylint E2E_saucedemo_website/*.py'
                     } else {
                         echo 'No Python files found for code analysis'
                     }
